@@ -1,0 +1,47 @@
+# Contributor: Björn Strömberg <bjorn.stromberg86@gmail.com>
+# Maintainer: None <none@example.com>
+
+pkgname=gpds
+pkgver=1.8.2
+pkgrel=0
+pkgdesc="General Purpose Data Serializer implemented as a very small C++ library"
+arch="all"
+url="https://gpds.simulton.com"
+license="MIT"
+depends="tinyxml2"
+makedepends="cmake tinyxml2-dev"
+# Dependencies for extra features
+# makedepends="$makedepends "
+checkdepends=""
+source="
+	${pkgname}-${pkgver}.tar.gz::https://github.com/simulton/${pkgname}/archive/refs/tags/${pkgver}.tar.gz
+"
+subpackages="$pkgname-dev $pkgname-doc"
+# options="!check" # remove '#' if needed for broken tests
+
+build() {
+	cmake -B build \
+		-DCMAKE_CXX_STANDARD=20 \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DGPDS_BUILD_TESTS="$(want_check && echo ON || echo OFF)" \
+		-DGPDS_BUILD_EXAMPLES=OFF \
+		-DGPDS_FEATURE_SPDLOG=OFF \
+		-DGPDS_DEPENDENCY_TINYXML2_PKGCONFIG=ON
+	cmake --build build
+}
+
+check() {
+	cd build
+	CTEST_OUTPUT_ON_FAILURE=TRUE ctest
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build	
+	install -Dm644 $srcdir/$pkgname-$pkgver/license.txt "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
+}
+
+sha512sums="
+e8a687c723e97aa6e391aebea43f1506622e3165351da78aafdba900a7850a3ea934e9e9e7ca3d4c94155add8210275a9679bdef755abccd7315105df839ca2a  gpds-1.8.2.tar.gz
+"
