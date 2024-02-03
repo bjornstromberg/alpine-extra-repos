@@ -1,0 +1,53 @@
+# Contributor: Björn Strömberg <bjorn.stromberg86@gmail.com>
+# Maintainer: None <none@example.com>
+
+pkgname=qschematic
+pkgver=1.5.1
+pkgrel=2
+pkgdesc="QSchematic is a library to draw diagrams & schematics with Qt"
+arch="all"
+url="https://qschematic.simulton.com"
+license="MIT"
+depends="gpds>=1.8.2 qt6-qtbase"
+makedepends="gpds-dev>=1.8.2 qt6-qtbase-dev"
+# Dependencies for extra features
+# makedepends="$makedepends "
+checkdepends=""
+source="
+	${pkgname}-${pkgver}.tar.gz::https://github.com/simulton/${pkgname}/archive/refs/tags/${pkgver}.tar.gz
+	0001-fix-itemscostodian.patch::https://github.com/simulton/QSchematic/commit/416d9736ff5f6ac3819de7dc645d5e6e12051856.patch
+"
+subpackages="$pkgname-dev $pkgname-doc"
+options="check"
+
+prepare() {
+	mv "$srcdir/QSchematic-$pkgver" "$srcdir/$pkgname-$pkgver"
+	default_prepare
+}
+
+build() {
+	cmake -S $srcdir/$pkgname-$pkgver -B $srcdir/build \
+		-DCMAKE_CXX_STANDARD=17 \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DQSCHEMATIC_DEPENDENCY_GPDS_TARGET="gpds::gpds-static" \
+		-DQSCHEMATIC_BUILD_DEMO=OFF \
+		-DQSCHEMATIC_DEPENDENCY_GPDS_DOWNLOAD=OFF
+	cmake --build $srcdir/build
+}
+
+check() {
+	cd $srcdir/build
+	CTEST_OUTPUT_ON_FAILURE=TRUE ctest
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install $srcdir/build
+	install -Dm644 $srcdir/$pkgname-$pkgver/license.txt "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
+}
+
+sha512sums="
+4b748397e83369764f3f1df49701ffe3dccb18713c0e2f55c1110b31c294f0205da10c06fd56ca0011e3f8f5a0a9970149ed84a586d6edd4febe18170d89723d  qschematic-1.5.1.tar.gz
+487abc9276c9c6764c0e5d11285dda946bad5db0f70818c6c394990dd4d14370fb59dc48af855999b9b0a25945df2d33d1e19325d422aad462befa8c0640f88c  0001-fix-itemscostodian.patch
+"
