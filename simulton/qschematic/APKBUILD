@@ -1,6 +1,8 @@
 # Contributor: Björn Strömberg <bjorn.stromberg86@gmail.com>
 # Maintainer: None <none@example.com>
 
+# test-dummy non-functional change
+
 pkgname=qschematic
 pkgver=1.5.1
 pkgrel=2
