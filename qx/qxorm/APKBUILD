@@ -1,0 +1,51 @@
+# Contributor: B.Strömberg <5454791+bjornstromberg@users.noreply.github.com>
+# Maintainer: B.Strömberg <5454791+bjornstromberg@users.noreply.github.com>
+
+# QxOrm library - C++ Qt ORM (Object Relational Mapping) and ODM (Object Document Mapper) library
+
+_pkgname=QxOrm
+pkgname=qxorm
+pkgver=1.5.0
+pkgrel=2
+pkgdesc="QxOrm library - C++ Qt ORM and ODM library"
+url="https://github.com/QxOrm/QxOrm/"
+arch="all"
+license="GPL-3.0"
+depends="qt6-qtbase qt6-qtbase-sqlite"
+depends_dev="qt6-qtbase-dev"
+makedepends="cmake samurai"
+checkdepends=""
+install=""
+subpackages="$pkgname-dev" # $pkgname-doc"
+source="https://github.com/${_pkgname}/${_pkgname}/archive/${pkgver}/${_pkgname}-${pkgver}.tar.gz"
+builddir="$srcdir/${_pkgname}-${pkgver}"
+options="!check" # seems to be no real testsuite, its more example programs
+
+build() {
+        if [ "$CBUILD" != "$CHOST" ]; then
+                local crossopts="-DCMAKE_SYSTEM_NAME=Linux -DCMAKE_HOST_SYSTEM_NAME=Linux"
+        fi
+        cmake -B build -G Ninja \
+                -DCMAKE_INSTALL_PREFIX=/usr \
+                -DCMAKE_INSTALL_LIBDIR=lib \
+                -DBUILD_SHARED_LIBS=ON \
+                -DCMAKE_BUILD_TYPE=None \
+                -D_QX_ENABLE_QT_GUI=ON \
+                -D_QX_ENABLE_QT_NETWORK=ON \
+                $crossopts
+        cmake --build build
+}
+
+check() {
+        # the whole testsuite does not use ctest and seems more to be a bunch of examples like qxBlog and stuff
+        # the amount of patching this would need is not worth it.. its a temporary dependency
+        ctest --test-dir build --output-on-failure
+}
+
+package() {
+        DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+a086d846c933929f2236af3e158c7715814b0caf4b9f76d34a95e4aa63b497fcdd47f20a2d5d68929d5f3fccc692ca1121d39aedcd18b4b375f94736756c85a6  QxOrm-1.5.0.tar.gz
+"
