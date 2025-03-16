@@ -1,8 +1,8 @@
-# Contributor: Björn Strömberg <bjorn.stromberg86@gmail.com>
+# Contributor: B.Strömberg <5454791+bjornstromberg@users.noreply.github.com>
 # Maintainer: None <none@example.com>
 
 pkgname=gpds
-pkgver=1.8.2
+pkgver=1.9.0
 pkgrel=0
 pkgdesc="General Purpose Data Serializer implemented as a very small C++ library"
 arch="all"
@@ -14,34 +14,32 @@ makedepends="cmake tinyxml2-dev"
 # makedepends="$makedepends "
 checkdepends=""
 source="
-	${pkgname}-${pkgver}.tar.gz::https://github.com/simulton/${pkgname}/archive/refs/tags/${pkgver}.tar.gz
+        ${pkgname}-${pkgver}.tar.gz::https://github.com/simulton/${pkgname}/archive/refs/tags/${pkgver}.tar.gz
 "
 subpackages="$pkgname-dev $pkgname-doc"
 # options="!check" # remove '#' if needed for broken tests
 
 build() {
-	cmake -B build \
-		-DCMAKE_CXX_STANDARD=20 \
-		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
-		-DCMAKE_INSTALL_PREFIX=/usr \
-		-DCMAKE_INSTALL_LIBDIR=lib \
-		-DGPDS_BUILD_TESTS="$(want_check && echo ON || echo OFF)" \
-		-DGPDS_BUILD_EXAMPLES=OFF \
-		-DGPDS_FEATURE_SPDLOG=OFF \
-		-DGPDS_DEPENDENCY_TINYXML2_PKGCONFIG=ON
-	cmake --build build
+        cmake -B build \
+                -DCMAKE_CXX_STANDARD=20 \
+                -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+                -DCMAKE_INSTALL_PREFIX=/usr \
+                -DCMAKE_INSTALL_LIBDIR=lib \
+                -DGPDS_BUILD_TESTS="$(want_check && echo ON || echo OFF)" \
+                -DGPDS_BUILD_EXAMPLES=OFF \
+                -DGPDS_DEPENDENCY_TINYXML2_PKGCONFIG=ON
+        cmake --build build
 }
 
 check() {
-	cd build
-	CTEST_OUTPUT_ON_FAILURE=TRUE ctest
+        ctest --test-dir build --output-on-failure
 }
 
 package() {
-	DESTDIR="$pkgdir" cmake --install build	
-	install -Dm644 $srcdir/$pkgname-$pkgver/license.txt "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
+        DESTDIR="$pkgdir" cmake --install build
+        install -Dm644 $srcdir/$pkgname-$pkgver/license.txt "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
 }
 
 sha512sums="
-e8a687c723e97aa6e391aebea43f1506622e3165351da78aafdba900a7850a3ea934e9e9e7ca3d4c94155add8210275a9679bdef755abccd7315105df839ca2a  gpds-1.8.2.tar.gz
+8f77e329559a2ee89b9a540e13ab94bf45eb3ce928aebe2f57494e3415df919983befec126471f92b40e5345e54bf64263d2e1e00a34e9bfa25fe3521857dccc  gpds-1.9.0.tar.gz
 "
