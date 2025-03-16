@@ -1,53 +1,59 @@
 # Contributor: B.Strömberg <5454791+bjornstromberg@users.noreply.github.com>
 # Maintainer: None <none@example.com>
 
-pkgname=qschematic
-pkgver=1.5.1
-pkgrel=3
+_pkgname=qschematic
+pkgname=simulton-qschematic
+pkgver=1.6.0
+pkgrel=0
 pkgdesc="QSchematic is a library to draw diagrams & schematics with Qt"
 arch="all"
 url="https://qschematic.simulton.com"
 license="MIT"
-depends="gpds>=1.8.2 qt6-qtbase"
-makedepends="gpds-dev>=1.8.2 qt6-qtbase-dev"
+depends="gpds>=1.8.4 qt6-qtbase"
+makedepends="gpds-dev>=1.8.4 qt6-qtbase-dev"
 # Dependencies for extra features
 # makedepends="$makedepends "
 checkdepends=""
 source="
-        ${pkgname}-${pkgver}.tar.gz::https://github.com/simulton/${pkgname}/archive/refs/tags/${pkgver}.tar.gz
-        0001-fix-itemscostodian.patch::https://github.com/simulton/QSchematic/commit/416d9736ff5f6ac3819de7dc645d5e6e12051856.patch
+        ${_pkgname}-${pkgver}.tar.gz::https://github.com/simulton/${_pkgname}/archive/refs/tags/${pkgver}.tar.gz
+        0001-fix-ctest-1-of-2.patch::https://github.com/simulton/QSchematic/commit/91e56d9bb0458aef8d1224e052666e8ff9bc8f44.patch
+        0002-fix-ctest-2-of-2.patch::https://github.com/simulton/QSchematic/commit/0c12f351d8a79257448080e3f12ce9cc893d1fba.patch
 "
 subpackages="$pkgname-dev $pkgname-doc"
-options="check"
+# options="check"
+builddir="$srcdir/${_pkgname}-${pkgver}" # this should probably be called source-tree-dir or whatever, since its out-of-source build..
+build_root_dir="$srcdir/build"
 
 prepare() {
-        mv "$srcdir/QSchematic-$pkgver" "$srcdir/$pkgname-$pkgver"
+        mv "$srcdir/QSchematic-$pkgver" "$builddir" # builddir is really the source-tree
         default_prepare
 }
 
 build() {
-        cmake -S $srcdir/$pkgname-$pkgver -B $srcdir/build \
-                -DCMAKE_CXX_STANDARD=17 \
+        cmake -S $srcdir/${_pkgname}-$pkgver -B "$build_root_dir" \
+                -DCMAKE_CXX_STANDARD=20 \
                 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
                 -DCMAKE_INSTALL_PREFIX=/usr \
                 -DCMAKE_INSTALL_LIBDIR=lib \
-                -DQSCHEMATIC_DEPENDENCY_GPDS_TARGET="gpds::gpds-static" \
                 -DQSCHEMATIC_BUILD_DEMO=OFF \
+                -DQSCHEMATIC_BUILD_SHARED=ON \
+                -DQSCHEMATIC_BUILD_STATIC=ON \
+                -DQSCHEMATIC_DEPENDENCY_GPDS_TARGET="gpds::gpds-static" \
                 -DQSCHEMATIC_DEPENDENCY_GPDS_DOWNLOAD=OFF
-        cmake --build $srcdir/build
+        cmake --build "$build_root_dir"
 }
 
 check() {
-        cd $srcdir/build
-        CTEST_OUTPUT_ON_FAILURE=TRUE ctest
+        ctest --test-dir "$build_root_dir" --output-on-failure
 }
 
 package() {
-        DESTDIR="$pkgdir" cmake --install $srcdir/build
-        install -Dm644 $srcdir/$pkgname-$pkgver/license.txt "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
+        DESTDIR="$pkgdir" cmake --install "$build_root_dir"
+        install -Dm644 $srcdir/${_pkgname}-$pkgver/license.txt "$pkgdir"/usr/share/licenses/${pkgname}/LICENSE
 }
 
 sha512sums="
-4b748397e83369764f3f1df49701ffe3dccb18713c0e2f55c1110b31c294f0205da10c06fd56ca0011e3f8f5a0a9970149ed84a586d6edd4febe18170d89723d  qschematic-1.5.1.tar.gz
-e4093c442c7fd16e178905de5b73e750597bb69b56f4e03705670159779d80067d3de6dc92f243384b2cbce4c818f8fec0ed16bf8fcbb368a1db38150b3839e3  0001-fix-itemscostodian.patch
+977a13e1bf1d3a517d6b75236667abc0ca463910e06d1c1f0071d134c95d95897582aafbc1fa560f69137e536e626d7025393b5a0f48b462380ded6a658dd0f4  qschematic-1.6.0.tar.gz
+c54f1b6bc971f3c64edb3e9fd275726557618964f9e9079abad598602d803419979e2b7ce6038f04bd9ad6b76ff395a5c73af9233123b667e747a1152bdf9a2d  0001-fix-ctest-1-of-2.patch
+7a2a02c628c65106032e3779d5dd2aa487f8962b4b3dea3557b345a6a0bc15165f5a02a9f1eeb1c608b041b7237ee461ba8a37962b5cd20c8bb2079da7bd21b4  0002-fix-ctest-2-of-2.patch
 "
