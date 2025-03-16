@@ -11,8 +11,6 @@ url="https://qschematic.simulton.com"
 license="MIT"
 depends="gpds>=1.8.4 qt6-qtbase"
 makedepends="gpds-dev>=1.8.4 qt6-qtbase-dev"
-# Dependencies for extra features
-# makedepends="$makedepends "
 checkdepends=""
 source="
         ${_pkgname}-${pkgver}.tar.gz::https://github.com/simulton/${_pkgname}/archive/refs/tags/${pkgver}.tar.gz
@@ -20,8 +18,8 @@ source="
         0002-fix-ctest-2-of-2.patch::https://github.com/simulton/QSchematic/commit/0c12f351d8a79257448080e3f12ce9cc893d1fba.patch
 "
 subpackages="$pkgname-dev $pkgname-doc"
-# options="check"
 builddir="$srcdir/${_pkgname}-${pkgver}" # this should probably be called source-tree-dir or whatever, since its out-of-source build..
+source_tree_root_dir="$builddir"
 build_root_dir="$srcdir/build"
 
 prepare() {
@@ -30,7 +28,7 @@ prepare() {
 }
 
 build() {
-        cmake -S $srcdir/${_pkgname}-$pkgver -B "$build_root_dir" \
+        cmake -S "$source_tree_root_dir" -B "$build_root_dir" \
                 -DCMAKE_CXX_STANDARD=20 \
                 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
                 -DCMAKE_INSTALL_PREFIX=/usr \
@@ -49,7 +47,7 @@ check() {
 
 package() {
         DESTDIR="$pkgdir" cmake --install "$build_root_dir"
-        install -Dm644 $srcdir/${_pkgname}-$pkgver/license.txt "$pkgdir"/usr/share/licenses/${pkgname}/LICENSE
+        install -Dm644 "$source_tree_root_dir/license.txt" "$pkgdir"/usr/share/licenses/${_pkgname}/LICENSE
 }
 
 sha512sums="
