@@ -1,0 +1,49 @@
+# Contributor: test dummy <test@dummy.home.lan>
+# Maintainer: test dummy <test@dummy.home.lan>
+pkgname=vulkan-scene-graph
+pkgver=1.1.10
+pkgrel=0
+pkgdesc="Vulkan & C++17 based Scene Graph Project"
+url="https://github.com/vsg-dev/VulkanSceneGraph"
+arch="all"
+license="MIT"
+depends="vulkan-loader glslang glslang-libs"
+depends_dev="cmake samurai"
+makedepends="$depends_dev vulkan-headers vulkan-loader-dev glslang-dev glslang-static spirv-tools-dev "
+checkdepends=""
+install=""
+subpackages="$pkgname-dev $pkgname-doc"
+source="
+        https://github.com/vsg-dev/VulkanSceneGraph/archive/v$pkgver/vulkan-scene-graph-$pkgver.tar.gz
+        0001-fix-musl-stat64.patch::https://github.com/bjornstromberg/VulkanSceneGraph/commit/b0206fe84de5253336e86c686945760ab7c8740b.patch
+        0002-add-traces-glslang-v15.patch::https://github.com/bjornstromberg/VulkanSceneGraph/commit/eeda4bd559dcd623572b17555411010508a7c081.patch
+"
+builddir="$srcdir/VulkanSceneGraph-$pkgver"
+
+build() {
+        if [ "$CBUILD" != "$CHOST" ]; then
+                local crossopts="-DCMAKE_SYSTEM_NAME=Linux -DCMAKE_HOST_SYSTEM_NAME=Linux"
+        fi
+
+        cmake -B build -G Ninja \
+                -DCMAKE_INSTALL_PREFIX=/usr \
+                -DCMAKE_INSTALL_LIBDIR=lib \
+                -DBUILD_SHARED_LIBS=ON \
+                -DCMAKE_BUILD_TYPE=None \
+                $crossopts
+        cmake --build build
+}
+
+check() {
+        ctest --test-dir build --output-on-failure
+}
+
+package() {
+        DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+eb32cc1418bbfd0907e7bc09080001b47f5c39a44b2693a2e3127a928d78a9e80ac4356b63fe4cd8bfb16f4bf829ea56eaaa0e878380fbfe06268962331cd86b  vulkan-scene-graph-1.1.10.tar.gz
+702efb028c729af2eac33746b76e2a3179e38f1bd4152e14806f0aa16bc86df336e2831e4c637158b571a62954410e4ff9be46192e9f04809fbd1318ca005b07  0001-fix-musl-stat64.patch
+311a5fb8932f1f65434367bc06c56a005782a8e27173e3425b0fab3e4736ecc5e1927140ec23182c99073d9bdf900ff45aca0b0885fde44066612a71ab8ceeb9  0002-add-traces-glslang-v15.patch
+"
