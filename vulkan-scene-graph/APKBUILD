@@ -19,6 +19,7 @@ source="
         0002-add-traces-glslang-v15.patch::https://github.com/bjornstromberg/VulkanSceneGraph/commit/eeda4bd559dcd623572b17555411010508a7c081.patch
 "
 builddir="$srcdir/VulkanSceneGraph-$pkgver"
+options="!check" # vsg does not build any testsuite..
 
 build() {
         if [ "$CBUILD" != "$CHOST" ]; then
