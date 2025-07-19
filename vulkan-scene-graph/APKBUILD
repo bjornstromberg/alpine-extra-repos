@@ -12,7 +12,7 @@ depends_dev="cmake samurai"
 makedepends="$depends_dev vulkan-headers vulkan-loader-dev glslang-dev glslang-static spirv-tools-dev "
 checkdepends=""
 install=""
-subpackages="$pkgname-dev $pkgname-doc"
+subpackages="$pkgname-dev" # $pkgname-doc" # TODO: install license.md in -doc?
 source="
         https://github.com/vsg-dev/VulkanSceneGraph/archive/v$pkgver/vulkan-scene-graph-$pkgver.tar.gz
         0001-fix-musl-stat64.patch::https://github.com/bjornstromberg/VulkanSceneGraph/commit/b0206fe84de5253336e86c686945760ab7c8740b.patch
